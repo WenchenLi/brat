@@ -25,7 +25,7 @@ from re import match as re_match
 from re import compile as re_compile
 
 from common import ProtocolError
-from filelock import file_lock
+from filelock_brat import file_lock
 from message import Messager
 
 
