@@ -1,8 +1,27 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright 2018 The Wenchen Li. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""
+simple spacy tagger services
 
+"""
 from argparse import ArgumentParser
 from cgi import FieldStorage
 from os.path import dirname, join as path_join
+from spacy_offline_tag import tag_to_json
 
 import spacy
 
@@ -48,24 +67,6 @@ class spacyTaggerHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         return # Too much noise from the default implementation
-
-def tag_to_json(nlp, text):
-    doc = nlp(text)
-
-    annotations = {}
-
-    def _add_ann(start, end, _type):
-        annotations[len(annotations)] = {
-                'type': _type,
-                'offsets': ((start, end), ),
-                'texts': ((text[start:end]), ),
-                }
-
-    for ent in doc.ents:
-        if u'\n' in text[ent.start_char:ent.end_char]: continue #currently spacy recognize \n as GPE
-        _add_ann(ent.start_char, ent.end_char, ent.label_)
-
-    return annotations
 
 def main(args):
     argp = ARGPARSER.parse_args(args[1:])
