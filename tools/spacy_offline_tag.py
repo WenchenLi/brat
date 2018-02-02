@@ -31,8 +31,9 @@ except ImportError:
 
 	sys_path.append(path_join(dirname(__file__), '../../server/lib/ujson'))
 	from ujson import dumps
-
+import os
 import sys
+
 reload(sys)
 sys.setdefaultencoding('utf8')
 
@@ -69,6 +70,7 @@ def load_text_from_file(file_path):
 
 	return "".join(result).decode("utf-8")
 
+
 def offline_annotate_to_ann_file(file_path):
 	"""
 	annotate text file offline and save annotated file as brat .ann file for NER
@@ -79,17 +81,17 @@ def offline_annotate_to_ann_file(file_path):
 	T2	PERSON 33 48	Selloff Worsens
 	:param tag_json:
 	"""
-	#spacy config
+	# spacy config
 	MODEL = 'en'
 
-	#writer config
+	# writer config
 	entity_start = "T"
 	start_entity_index = 0
 	tab = "\t"
 	space = " "
 
 	KEY_TEXT = "texts"
-	KEY_TYPE= "type"
+	KEY_TYPE = "type"
 	KEY_OFFSETS = "offsets"
 
 	# annotate first
@@ -99,18 +101,63 @@ def offline_annotate_to_ann_file(file_path):
 
 	# write to file as .ann file
 
-	ann_filename = file_path.replace("txt","ann")
-	with open(ann_filename,'w') as fo:
+	ann_filename = file_path.replace("txt", "ann")
+	with open(ann_filename, 'w') as fo:
 		for k in sorted(tag_result.keys()):
 			_type = tag_result[k][KEY_TYPE]
 			_offsets = tag_result[k][KEY_OFFSETS]
 			_text = unicode(tag_result[k][KEY_TEXT][0]).replace('\u', " ")
 
-			line = entity_start + str(k) + tab + _type + space + str(_offsets[0][0]) + space + str(_offsets[0][1]) + tab + _text
-			fo.write(line+"\n")
+			line = entity_start + str(k) + tab + _type + space + str(_offsets[0][0]) + space + str(
+				_offsets[0][1]) + tab + _text
+			fo.write(line + "\n")
 
+
+def check_exists_ann_file(text_file_path):
+	"""
+	check whether exists annotated file
+	:param text_file_path: .txt file to be annotated
+	:return:bool | whether the corresponding annotation file exists
+	"""
+	return os.path.isfile(text_file_path.replace(".txt", ".ann"))
+
+
+def check_ann_file_annotated(text_file_path):
+	"""
+	check whether ann file annotated
+	:param text_file_path:.txt file to be annotated
+	:return:bool | whether the corresponding annotation file has been annotated
+	"""
+	return os.stat(text_file_path.replace(".txt", ".ann")).st_size > 0
+
+
+def walk_directory_get_unannotated(seed_path):
+	"""
+	walk through the dir under seed path and find all unannotated file
+	:param seed_path: str| under which directory the files will be annotated
+	:return: text_need_ann, list of str| unannotated files, path start from the seed_path(so relative)
+	"""
+	text_need_ann = []
+
+	for root, dirs, files in os.walk(seed_path):
+		path = root.split(os.sep)
+		# print((len(path) - 1) * '---', os.path.basename(root))
+		for file in files:
+			# print(len(path) * '---', file)
+			if file.endswith(".txt"): # is the text file to be annotated
+				# check .ann
+				full_file_path = root + '/' + file
+				if check_exists_ann_file(full_file_path) and check_ann_file_annotated(full_file_path):continue
+				else: #need annotation
+					text_need_ann.append(full_file_path)
+
+	return text_need_ann
 
 if __name__ == '__main__':
-	file_path = '/home/wenchen/projects/brat/data/news/bloomberg/1.txt'
-	offline_annotate_to_ann_file(file_path)
+	# example annotate single file
+	# file_path = '/home/wenchen/projects/brat/data/news/bloomberg/1.txt'
+	# offline_annotate_to_ann_file(file_path)
 
+	# example walk through given directory
+	seed_path = '/home/wenchen/projects/brat/data/news'
+	print (walk_directory_get_unannotated(seed_path))

@@ -70,9 +70,7 @@ class spacyTaggerHandler(BaseHTTPRequestHandler):
 
 def main(args):
     argp = ARGPARSER.parse_args(args[1:])
-
     print >> stderr, "WARNING: Don't use this in a production environment!"
-
     print >> stderr, 'Starting spaCy',
     global TAGGER
     TAGGER = spacy.load(MODEL)
@@ -80,6 +78,7 @@ def main(args):
 
     server_class = HTTPServer
     httpd = server_class(('localhost', argp.port), spacyTaggerHandler)
+
     print >> stderr, 'spacy tagger service started'
     try:
         httpd.serve_forever()
