@@ -140,7 +140,7 @@ def walk_directory_get_unannotated(seed_path):
 	text_need_ann = []
 
 	for root, dirs, files in os.walk(seed_path):
-		path = root.split(os.sep)
+		# path = root.split(os.sep)
 		# print((len(path) - 1) * '---', os.path.basename(root))
 		for file in files:
 			# print(len(path) * '---', file)

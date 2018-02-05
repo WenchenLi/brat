@@ -117,3 +117,20 @@ them on CC since their responsibilities and availability may vary:
 * Goran Topić       &lt;goran_topic nii ac jp&gt;
 * Sampo Pyysalo     &lt;sampo.pyysalo gmail com&gt;
 * Pontus Stenetorp  &lt;pontus stenetorp se&gt;
+
+## better way install simstring and python binding ##
+
+```
+sudo apt-get install simstring-bin simstring-dev
+
+```
+
+`sudo subl /usr/local/include/simstring/memory_mapped_file.h  `
+and insert `#include <unistd.h>` 
+
+then for the python binding installation in setup.py, change get_includedir() to :
+```python
+def get_includedir():
+    return '/usr/local/include'
+    # return os.path.join(get_rootdir(), 'include')
+```
